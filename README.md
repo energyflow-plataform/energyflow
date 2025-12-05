@@ -138,8 +138,8 @@ frontend.url=${FRONTEND_URL:http://127.0.0.1:5500/frontend}
 
 - ✅ Cadastro e autenticação de usuários (via API REST)
 - ✅ Gerenciamento completo dos recursos Unidade, Ambiente e Dispositivo (via API REST) 
-- 🚧 Monitoramento energético em tempo real *(em desenvolvimento)*  
-- 🚧 Painel de controle com estatísticas e alertas *(em breve)*  
+- ✅ Monitoramento energético em tempo real de dispositivos ligados 
+- ✅ Painel de controle com estatísticas e relatórios  
 
 ---
 
