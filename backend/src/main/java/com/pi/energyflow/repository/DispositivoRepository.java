@@ -8,10 +8,11 @@ import com.pi.energyflow.model.Dispositivo;
 
 public interface DispositivoRepository extends JpaRepository<Dispositivo, Long> {
 
-	List<Dispositivo> findAllByNomeContainingIgnoreCase(String nome);
-	List<Dispositivo> findAllByTipoContainingIgnoreCase(String tipo);
+	List<Dispositivo> findAllByAmbienteUnidadeCriadoPorIdAndAtivoTrue(Long usuarioId);
+	List<Dispositivo> findAllByNomeContainingIgnoreCaseAndAmbienteUnidadeCriadoPorIdAndAtivoTrue(String nome, Long usuarioId);
+	List<Dispositivo> findAllByTipoContainingIgnoreCaseAndAmbienteUnidadeCriadoPorIdAndAtivoTrue(String tipo, Long usuarioId);
+	List<Dispositivo> findAllByStatusAndAmbienteUnidadeCriadoPorIdAndAtivoTrue(Boolean status, Long usuarioId);
+	List<Dispositivo> findAllByAmbienteIdAndAmbienteUnidadeCriadoPorIdAndAtivoTrue(Long ambienteId, Long usuarioId);
+	List<Dispositivo> findAllByAmbienteNomeContainingIgnoreCaseAndAmbienteUnidadeCriadoPorIdAndAtivoTrue(String nome, Long usuarioId);
 	List<Dispositivo> findAllByStatus(Boolean status);
-	List<Dispositivo> findAllByAmbienteId(Long id);
-	List<Dispositivo> findAllByAmbienteNomeContainingIgnoreCase(String nome);
-
 }

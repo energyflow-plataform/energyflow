@@ -25,6 +25,12 @@ public class SecurityConfig {
         "/api/auth/register",
         "/api/usuarios/senha/recuperar",
         "/api/usuarios/senha/resetar",
+        "/consumo/dispositivo/{id}",
+        "/api/dispositivos",
+        "/api/consumo/dispositivo/{id}/24h",
+        "/api/consumo/dispositivo/{id}/semana",
+        "/api/consumo/dispositivo/{id}/mes",
+        "/api/consumo/tempo-real/{idDispositivo}",
         "/error/**",
         "/", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**"
     };

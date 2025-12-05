@@ -8,5 +8,7 @@ import com.pi.energyflow.model.Unidade;
 
 public interface UnidadeRepository extends JpaRepository<Unidade, Long> {
 
-	List<Unidade> findByNomeContainingIgnoreCase(String nome);
+    List<Unidade> findByCriadoPorId(Long usuarioId);
+
+    List<Unidade> findByNomeContainingIgnoreCaseAndCriadoPorId(String nome, Long usuarioId);
 }

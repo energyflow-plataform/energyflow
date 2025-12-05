@@ -1,9 +1,8 @@
 package com.pi.energyflow.model;
 
-import java.math.BigDecimal;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,10 +27,15 @@ public class Dispositivo {
 	private String tipo;
 	
 	@NotNull(message = "Potência é obrigatória.")
-	private BigDecimal potencia;
+	private Double potencia;
 	
 	@NotNull(message = "Status é obrigatório.")
+	@Column(columnDefinition = "TINYINT(1)")
 	private Boolean status;
+	
+	@NotNull
+	@Column(columnDefinition = "TINYINT(1)")
+	private Boolean ativo = true;
 	
 	@ManyToOne
 	@JsonIgnoreProperties("dispositivo")
@@ -61,11 +65,11 @@ public class Dispositivo {
 		this.tipo = tipo;
 	}
 	
-	public BigDecimal getPotencia() {
+	public Double getPotencia() {
 		return potencia;
 	}
 	
-	public void setPotencia(BigDecimal potencia) {
+	public void setPotencia(Double potencia) {
 		this.potencia = potencia;
 	}
 	
@@ -83,5 +87,17 @@ public class Dispositivo {
 	
 	public void setAmbiente(Ambiente ambiente) {
 		this.ambiente = ambiente;
+	}
+
+	public Boolean getAtivo() {
+		return ativo;
+	}
+
+	public void setAtivo(Boolean ativo) {
+		this.ativo = ativo;
+	}
+
+	public Boolean getStatus() {
+		return status;
 	}
 }

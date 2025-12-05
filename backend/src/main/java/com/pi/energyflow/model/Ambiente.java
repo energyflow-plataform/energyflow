@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,7 +35,7 @@ public class Ambiente {
 	@JsonIgnoreProperties("ambiente")
 	private Unidade unidade;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "ambiente", cascade = CascadeType.REMOVE)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "ambiente")
 	@JsonIgnoreProperties(value = "ambiente", allowSetters = true)
 	private List<Dispositivo> dispositivo;
 

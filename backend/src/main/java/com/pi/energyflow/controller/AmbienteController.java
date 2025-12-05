@@ -1,7 +1,6 @@
 package com.pi.energyflow.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.pi.energyflow.model.Ambiente;
-import com.pi.energyflow.repository.AmbienteRepository;
-import com.pi.energyflow.repository.UnidadeRepository;
+import com.pi.energyflow.service.AmbienteService;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -30,76 +27,54 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/ambientes")
 public class AmbienteController {
 	
-	@Autowired
-	private AmbienteRepository ambienteRepository;
-	
-	@Autowired
-	private UnidadeRepository unidadeRepository;
-	
-	@Operation(summary = "Lista todos os ambientes", description = "Retorna uma lista com todos os ambientes cadastrados.")
-	@GetMapping
-	public ResponseEntity<List<Ambiente>> getAll() {
-		return ResponseEntity.ok(ambienteRepository.findAll());
-	}
-	
-	@Operation(summary = "Busca ambiente por ID", description = "Retorna um ambiente específico com base no ID fornecido.")
-	@GetMapping("/{id}")
-	public ResponseEntity<Ambiente> getById(@PathVariable Long id) {
-		return ambienteRepository.findById(id)
-				.map(resposta -> ResponseEntity.ok(resposta))
-				.orElse(ResponseEntity.notFound().build());
-	}
-	
-	@Operation(summary = "Busca ambientes por nome", description = "Retorna uma lista de ambientes cujo nome contenha o valor fornecido.")
-	@GetMapping("/nome/{nome}")
-	public ResponseEntity<List<Ambiente>> getAllByNome(@PathVariable String nome) {
-		return ResponseEntity.ok(ambienteRepository.findAllByNomeContainingIgnoreCase(nome));
-	}
-	
-	@Operation(summary = "Busca ambientes por ID da unidade", description = "Retorna uma lista de ambientes associados a uma unidade específica com base no ID da unidade fornecido.")
-	@GetMapping("/unidades/{id}")
-	public ResponseEntity<List<Ambiente>> getAllByUnidadeId(@PathVariable Long id) {
-		if (!unidadeRepository.existsById(id)) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(ambienteRepository.findAllByUnidadeId(id));
-	}
-	
-	@Operation(summary = "Busca ambientes por nome da unidade", description = "Retorna uma lista de ambientes associados a unidades cujo nome contenha o valor fornecido.")
-	@GetMapping("/unidades/nome/{nome}")
-	public ResponseEntity<List<Ambiente>> getAllByUnidadeNome(@PathVariable String nome) {
-		return ResponseEntity.ok(ambienteRepository.findAllByUnidadeNomeContainingIgnoreCase(nome));
-	}
-	
-	@Operation(summary = "Cria um novo ambiente", description = "Adiciona um novo ambiente ao sistema.")
-	@PostMapping
-	public ResponseEntity<Ambiente> post(@Valid @RequestBody Ambiente ambiente) {
-		if (unidadeRepository.existsById(ambiente.getUnidade().getId())) {
-			ambiente.setId(null);
-			return ResponseEntity.status(201).body(ambienteRepository.save(ambiente));
-		}
-		return ResponseEntity.badRequest().build();
-	}
-	
-	@Operation(summary = "Atualiza um ambiente existente", description = "Atualiza os detalhes de um ambiente existente com base no ID fornecido.")
-	@PutMapping
-	public ResponseEntity<Ambiente> put(@Valid @RequestBody Ambiente ambiente) {
-		if (ambienteRepository.existsById(ambiente.getId())) {
-			if (unidadeRepository.existsById(ambiente.getUnidade().getId())) {
-				return ResponseEntity.ok(ambienteRepository.save(ambiente));
-			}
-			return ResponseEntity.badRequest().build();
-		}
-		return ResponseEntity.notFound().build();
-	}
-	
-	@Operation(summary = "Deleta um ambiente", description = "Remove um ambiente do sistema com base no ID fornecido.")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@DeleteMapping("/{id}")
-	public void delete(@PathVariable Long id) {
-		Optional<Ambiente> ambiente = ambienteRepository.findById(id);
-		if (ambiente.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		ambienteRepository.deleteById(id);
-	}
+    @Autowired
+    private AmbienteService ambienteService;
+
+    @GetMapping
+    public ResponseEntity<List<Ambiente>> getAll() {
+        return ResponseEntity.ok(ambienteService.getAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Ambiente> getById(@PathVariable Long id) {
+        return ambienteService.getById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<List<Ambiente>> getByNome(@PathVariable String nome) {
+        return ResponseEntity.ok(ambienteService.getByNome(nome));
+    }
+
+    @GetMapping("/unidades/{id}")
+    public ResponseEntity<List<Ambiente>> getByUnidade(@PathVariable Long id) {
+        return ResponseEntity.ok(ambienteService.getByUnidade(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<Ambiente> salvar(@Valid @RequestBody Ambiente ambiente) {
+        return ResponseEntity.status(201).body(ambienteService.salvar(ambiente));
+    }
+
+    @PutMapping
+    public ResponseEntity<Ambiente> atualizar(@Valid @RequestBody Ambiente ambiente) {
+        return ResponseEntity.ok(ambienteService.atualizar(ambiente));
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+    	Ambiente ambiente = ambienteService.getById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!ambiente.getDispositivo().isEmpty()) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Não é possível excluir um ambiente que possui dispositivos vinculados."
+            );
+        }
+
+        ambienteService.delete(id);
+    }
 }

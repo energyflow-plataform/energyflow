@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -45,7 +44,7 @@ public class Unidade {
 	@Embedded
 	private Endereco endereco;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "unidade", cascade = CascadeType.REMOVE)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "unidade")
 	@JsonIgnoreProperties(value = "unidade", allowSetters = true)
 	private List<Ambiente> ambiente;
 

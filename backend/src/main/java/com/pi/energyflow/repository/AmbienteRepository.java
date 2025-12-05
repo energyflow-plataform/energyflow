@@ -8,7 +8,9 @@ import com.pi.energyflow.model.Ambiente;
 
 public interface AmbienteRepository extends JpaRepository<Ambiente, Long> {
 
-	List<Ambiente> findAllByNomeContainingIgnoreCase(String nome);
-	List<Ambiente> findAllByUnidadeId(Long id);
-	List<Ambiente> findAllByUnidadeNomeContainingIgnoreCase(String nome);
+    List<Ambiente> findAllByUnidadeCriadoPorId(Long usuarioId);
+
+    List<Ambiente> findAllByNomeContainingIgnoreCaseAndUnidadeCriadoPorId(String nome, Long usuarioId);
+
+    List<Ambiente> findAllByUnidadeIdAndUnidadeCriadoPorId(Long unidadeId, Long usuarioId);
 }

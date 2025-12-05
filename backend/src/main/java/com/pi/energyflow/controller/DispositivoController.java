@@ -1,7 +1,6 @@
 package com.pi.energyflow.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,8 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.pi.energyflow.model.Dispositivo;
-import com.pi.energyflow.repository.AmbienteRepository;
-import com.pi.energyflow.repository.DispositivoRepository;
+import com.pi.energyflow.service.DispositivoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,99 +27,80 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/dispositivos")
 public class DispositivoController {
-	
-	@Autowired
-	private DispositivoRepository dispositivoRepository;
-	
-	@Autowired
-	private AmbienteRepository ambienteRepository;
-	
-	@Operation(summary = "Lista todos os dispositivos", description = "Retorna uma lista com todos os dispositivos cadastrados.")
-	@GetMapping
-	public ResponseEntity<List<Dispositivo>> getAll() {
-		return ResponseEntity.ok(dispositivoRepository.findAll());
-	}
-	
-	@Operation(summary = "Busca dispositivo por ID", description = "Retorna um dispositivo específico com base no ID fornecido.")
-	@GetMapping("/{id}")
-	public ResponseEntity<Dispositivo> getById(@PathVariable Long id) {
-		return dispositivoRepository.findById(id)
-				.map(resposta -> ResponseEntity.ok(resposta))
-				.orElse(ResponseEntity.notFound().build());
-	}
-	
-	@Operation(summary = "Busca dispositivos por nome", description = "Retorna uma lista de dispositivos cujo nome contenha o valor fornecido.")
-	@GetMapping("/nome/{nome}")
-	public ResponseEntity<List<Dispositivo>> getAllByNome(@PathVariable String nome) {
-		return ResponseEntity.ok(dispositivoRepository.findAllByNomeContainingIgnoreCase(nome));
-	}
-	
-	@Operation(summary = "Busca dispositivos por tipo", description = "Retorna uma lista de dispositivos cujo tipo contenha o valor fornecido.")
-	@GetMapping("/tipo/{tipo}")
-	public ResponseEntity<List<Dispositivo>> getAllByTipo(@PathVariable String tipo) {
-		return ResponseEntity.ok(dispositivoRepository.findAllByTipoContainingIgnoreCase(tipo));
-	}
-	
-	@Operation(summary = "Busca dispositivos por status", description = "Retorna uma lista de dispositivos com o status fornecido (true para ligado, false para desligado).")
-	@GetMapping("/status/{status}")
-	public ResponseEntity<List<Dispositivo>> getAllByStatus(@PathVariable Boolean status) {
-		return ResponseEntity.ok(dispositivoRepository.findAllByStatus(status));
-	}
-	
-	@Operation(summary = "Busca dispositivos por ID do ambiente", description = "Retorna uma lista de dispositivos associados a um ambiente específico com base no ID do ambiente fornecido.")
-	@GetMapping("/ambientes/{id}")
-	public ResponseEntity<List<Dispositivo>> getAllByAmbienteId(@PathVariable Long id) {
-		if (!ambienteRepository.existsById(id)) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(dispositivoRepository.findAllByAmbienteId(id));
-	}
-	
-	@Operation(summary = "Busca dispositivos por nome do ambiente", description = "Retorna uma lista de dispositivos associados a ambientes cujo nome contenha o valor fornecido.")
-	@GetMapping("/ambientes/nome/{nome}")
-	public ResponseEntity<List<Dispositivo>> getAllByAmbienteNome(@PathVariable String nome) {
-		return ResponseEntity.ok(dispositivoRepository.findAllByAmbienteNomeContainingIgnoreCase(nome));
-	}
-	
-	@Operation(summary = "Cria um novo dispositivo", description = "Adiciona um novo dispositivo ao sistema.")
-	@PostMapping
-	public ResponseEntity<Dispositivo> post(@Valid @RequestBody Dispositivo dispositivo) {
-	    if (dispositivo.getAmbiente() == null || dispositivo.getAmbiente().getId() == null) 
-	        return ResponseEntity.badRequest().build();
 
-	    if (!ambienteRepository.existsById(dispositivo.getAmbiente().getId())) 
-	        return ResponseEntity.notFound().build(); 
-	   
-	    dispositivo.setId(null);
-	    Dispositivo salvo = dispositivoRepository.save(dispositivo);
-	    return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
-	}
+    @Autowired
+    private DispositivoService dispositivoService;
 
-	
-	@Operation(summary = "Atualiza um dispositivo existente", description = "Atualiza os detalhes de um dispositivo existente com base no ID fornecido.")
-	@PutMapping
-	public ResponseEntity<Dispositivo> put(@Valid @RequestBody Dispositivo dispositivo) {
-	    if (!dispositivoRepository.existsById(dispositivo.getId())) 
-	        return ResponseEntity.notFound().build();
-	    
-	    if (dispositivo.getAmbiente() == null || dispositivo.getAmbiente().getId() == null) 
-	        return ResponseEntity.badRequest().build();
-	   
-	    if (!ambienteRepository.existsById(dispositivo.getAmbiente().getId()))
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                             .body(null); 
+    @Operation(summary = "Lista todos os dispositivos")
+    @GetMapping
+    public ResponseEntity<List<Dispositivo>> getAll() {
+        return ResponseEntity.ok(dispositivoService.getAll());
+    }
 
-	    Dispositivo atualizado = dispositivoRepository.save(dispositivo);
-	    return ResponseEntity.ok(atualizado);
-	}
-	
-	@Operation(summary = "Deleta um dispositivo", description = "Remove um dispositivo do sistema com base no ID fornecido.")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@DeleteMapping("/{id}")
-	public void delete(@PathVariable Long id) {
-		Optional<Dispositivo> dispositivo = dispositivoRepository.findById(id);
-		if (dispositivo.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		dispositivoRepository.deleteById(id);
-	}
+    @Operation(summary = "Busca dispositivo por ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<Dispositivo> getById(@PathVariable Long id) {
+        return dispositivoService.getById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Busca dispositivos por nome")
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<List<Dispositivo>> getByNome(@PathVariable String nome) {
+        return ResponseEntity.ok(dispositivoService.getByNome(nome));
+    }
+
+    @Operation(summary = "Busca dispositivos por tipo")
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<List<Dispositivo>> getByTipo(@PathVariable String tipo) {
+        return ResponseEntity.ok(dispositivoService.getByTipo(tipo));
+    }
+
+    @Operation(summary = "Busca dispositivos por status")
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Dispositivo>> getByStatus(@PathVariable Boolean status) {
+        return ResponseEntity.ok(dispositivoService.getByStatus(status));
+    }
+
+    @Operation(summary = "Busca dispositivos por ID do ambiente")
+    @GetMapping("/ambientes/{id}")
+    public ResponseEntity<List<Dispositivo>> getByAmbienteId(@PathVariable Long id) {
+        return ResponseEntity.ok(dispositivoService.getByAmbienteId(id));
+    }
+
+    @Operation(summary = "Busca dispositivos pelo nome do ambiente")
+    @GetMapping("/ambientes/nome/{nome}")
+    public ResponseEntity<List<Dispositivo>> getByAmbienteNome(@PathVariable String nome) {
+        return ResponseEntity.ok(dispositivoService.getByAmbienteNome(nome));
+    }
+
+    @Operation(summary = "Cria um novo dispositivo")
+    @PostMapping
+    public ResponseEntity<Dispositivo> post(@Valid @RequestBody Dispositivo dispositivo) {
+
+        return dispositivoService.salvar(dispositivo)
+                .map(salvo -> ResponseEntity.status(HttpStatus.CREATED).body(salvo))
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @Operation(summary = "Atualiza um dispositivo existente")
+    @PutMapping
+    public ResponseEntity<Dispositivo> put(@Valid @RequestBody Dispositivo dispositivo) {
+
+        return dispositivoService.atualizar(dispositivo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Deleta um dispositivo")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+
+        boolean removido = dispositivoService.delete(id);
+
+        if (!removido)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
 }
